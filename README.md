@@ -6,6 +6,12 @@ Allows you to complete daily tasks and visually track consistency over time.
 
 The calendar displays daily progress using colour intensity and a progress bar, encouraging habit streak building.
 
+## Desktop Version
+
+A downloadable Windows version is available here:
+
+https://github.com/dannybirin/habit-tracker-desktop
+
 ---
 
 ## Overview
