@@ -1,0 +1,830 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Commitment Calendar</title>
+
+  <style>
+    :root{
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --shadow: 0 10px 30px rgba(0,0,0,0.08);
+      --purple: #7c3aed;
+      --bg-dark: #0f172a;
+      --card-dark: #1e293b;
+      --text-dark: #f1f5f9;
+      --border-dark: #334155;
+
+
+      --white: #ffffff;
+      --c1: #cf7b0c;
+      --c2: #f0e10d;
+      --c3: #5eff00;
+
+      --bar0: transparent;
+      --bar1: #d48e0a;
+      --bar2: #b3710e;
+      --bar3: #2b8a3e;
+    }
+
+    * { box-sizing: border-box; }
+    body{
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .top{
+      padding: 28px 18px 10px;
+      text-align: center;
+    }
+    .title{
+      font-size: 34px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin: 0;
+    }
+
+    .wrap{
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 18px;
+    }
+
+    .grid{
+      display: grid;
+      grid-template-columns: 2fr 1.05fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .card{
+      background: var(--card);
+      border: 1px solid rgba(229,231,235,0.9);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 18px 18px 16px;
+      min-height: 520px;
+    }
+
+    .cardHeader{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .card h2{
+      margin: 0;
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .monthControls{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn{
+      border: 1px solid var(--border);
+      background: #fff;
+      border-radius: 10px;
+      padding: 8px 10px;
+      cursor: pointer;
+      font-weight: 700;
+      color: #374151;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    }
+
+    .btn:hover{
+      border-color: rgba(124,58,237,0.5);
+    }
+
+    .monthLabel{
+      font-weight: 800;
+      color: #374151;
+      min-width: 160px;
+      text-align: center;
+    }
+
+    .daysArea{
+      height: 520px;
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+
+    .daysArea::-webkit-scrollbar { width: 10px; }
+    .daysArea::-webkit-scrollbar-thumb {
+      background: rgba(124,58,237,0.45);
+      border-radius: 20px;
+      border: 3px solid transparent;
+      background-clip: content-box;
+    }
+    .daysArea::-webkit-scrollbar-track { background: transparent; }
+
+    .weekdayRow{
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .weekday{
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .daysGrid{
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 12px;
+    }
+
+.dayCard{
+  border: 1px solid var(--border);
+  background: var(--white);
+  border-radius: 12px;
+  padding: 8px 12px 20px;
+  height: 78px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 2px;
+  position: relative;
+  transition: transform 0.06s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  user-select: none;
+}
+
+
+
+
+    .dayCard:hover{
+      transform: translateY(-1px);
+      box-shadow: 0 10px 22px rgba(0,0,0,0.08);
+    }
+
+.dayTop{
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  margin-top: -2px;
+}
+
+
+
+.dayNum{
+  font-size: 24px;
+  font-weight: 900;
+  color: #111827;
+  line-height: 1;
+  margin-top: -2px;
+}
+
+
+
+.dayMonth{
+  position: absolute;
+  left: 12px;
+  top: 56px;
+  font-size: 12px;
+  color: var(--purple);
+  font-weight: 800;
+}
+
+
+
+    .selected{
+      border: 2px solid rgba(124,58,237,0.75) !important;
+      box-shadow: 0 12px 26px rgba(124,58,237,0.20) !important;
+    }
+
+.progressTrack{
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 20px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+
+
+
+    .progressFill{
+      height: 100%;
+      border-radius: 999px;
+      width: 0%;
+    }
+
+    .blank{
+      height: 78px;
+    }
+
+    .dateLine{
+      color: var(--purple);
+      font-weight: 900;
+      margin: 2px 0 14px;
+    }
+
+    .taskRow{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(229,231,235,0.8);
+      margin-bottom: 10px;
+    }
+
+    .taskRow input[type="checkbox"]{
+      width: 18px;
+      height: 18px;
+      accent-color: var(--purple);
+      cursor: pointer;
+    }
+
+    .taskRow label{
+      cursor: pointer;
+      font-size: 14px;
+      color: #374151;
+      flex: 1;
+    }
+
+    .sectionTitle{
+      margin: 16px 0 10px;
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .editRow{
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(229,231,235,0.8);
+      margin-bottom: 10px;
+    }
+
+    .textInput{
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 10px;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .danger{
+      border-color: rgba(239,68,68,0.35);
+      color: #991b1b;
+    }
+
+    .hint{
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 10px;
+      line-height: 1.4;
+    }
+
+    .dark body{
+  background: var(--bg-dark);
+  color: var(--text-dark);
+}
+
+.dark .card{
+  background: var(--card-dark);
+  border-color: var(--border-dark);
+}
+
+.dark .dayCard{
+  border-color: var(--border-dark);
+}
+
+.dark .btn{
+  background: #1e293b;
+  color: var(--text-dark);
+  border-color: var(--border-dark);
+}
+
+.dark .monthLabel{
+  color: var(--text-dark);
+}
+
+.dark .weekday{
+  color: rgba(241,245,249,0.75);
+}
+
+.dark .dayTop{
+  color: #6b7280;
+}
+
+.dark .dayNum{
+  color: #111827;
+}
+
+.dark .dateLine{
+  color: #a78bfa;
+}
+
+.dark .taskRow{
+  background: rgba(255,255,255,0.02);
+  border-color: var(--border-dark);
+}
+
+.dark .taskRow label{
+  color: var(--text-dark);
+}
+
+.dark .editRow{
+  background: rgba(255,255,255,0.02);
+  border-color: var(--border-dark);
+}
+
+.dark .sectionTitle{
+  color: rgba(241,245,249,0.7);
+}
+
+.dark .hint{
+  color: rgba(241,245,249,0.7);
+}
+
+.dark .textInput{
+  background: #0b1220;
+  color: var(--text-dark);
+  border-color: var(--border-dark);
+}
+
+.dark .textInput::placeholder{
+  color: rgba(241,245,249,0.5);
+}
+
+.dark .dayCard{
+  background: #ffffff;
+}
+
+.dark .dayMonth{
+  color: #7c3aed;
+}
+
+
+    @media (max-width: 980px){
+      .grid{ grid-template-columns: 1fr; }
+      .card{ min-height: auto; }
+      .daysArea{ height: 420px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="top">
+  <h1 class="title">Daily Commitment Calendar</h1>
+  <button id="darkToggle" class="btn" type="button">
+    Toggle Dark Mode
+  </button>
+</div>
+
+
+  <div class="wrap">
+    <div class="grid">
+      <div class="card">
+        <div class="cardHeader">
+          <h2>Calendar</h2>
+          <div class="monthControls">
+            <button id="prevBtn" class="btn" type="button">◀</button>
+            <div id="monthLabel" class="monthLabel"></div>
+            <button id="nextBtn" class="btn" type="button">▶</button>
+          </div>
+        </div>
+
+        <div class="daysArea">
+          <div class="weekdayRow" id="weekdayRow"></div>
+          <div id="daysGrid" class="daysGrid"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Daily Tasks</h2>
+        <div id="streakInfo" style="margin-bottom:10px;font-weight:800;"></div>
+        <div id="dateLine" class="dateLine"></div>
+        <div id="tasksArea"></div>
+
+        <div class="sectionTitle">Edit tasks</div>
+        <div id="taskEditor"></div>
+
+        <div class="editRow">
+          <input id="newTaskInput" class="textInput" type="text" placeholder="New task name..." />
+          <button id="addTaskBtn" class="btn" type="button">Add</button>
+        </div>
+
+        <div class="hint">
+          Tick tasks for a day. Days go from white → orange → green, with a progress bar.
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  function loadJSON(key, fallback){
+    const raw = localStorage.getItem(key);
+    if(!raw) return fallback;
+    try { return JSON.parse(raw); } catch { return fallback; }
+  }
+
+  function saveJSON(key, value){
+    localStorage.setItem(key, JSON.stringify(value));
+  }
+
+  function makeId(){
+    return "t_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16);
+  }
+
+  function pad2(n){ return String(n).padStart(2,"0"); }
+
+  function toKey(d){
+    return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+  }
+
+  const MONTHS_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const MONTHS_LONG = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const WEEKDAYS_MON = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+
+  let tasks = loadJSON("tasks", [
+    { id: makeId(), name: "Meditate for 10 min" },
+    { id: makeId(), name: "Drink 8 glasses of water" },
+    { id: makeId(), name: "Read 20 pages (non-fiction)" },
+    { id: makeId(), name: "30 minutes of physical activity" },
+    { id: makeId(), name: "Journal one positive memory" }
+  ]);
+
+  let dayData = loadJSON("dayData", {});
+
+  function ensureDay(key){
+    if(!dayData[key]) dayData[key] = {};
+    saveJSON("dayData", dayData);
+  }
+
+  function completionRatioFor(key){
+    if(tasks.length === 0) return 0;
+    const obj = dayData[key] || {};
+    let done = 0;
+    for(const t of tasks){
+      if(obj[t.id] === true) done++;
+    }
+    return done / tasks.length;
+  }
+
+  function colourFor(ratio){
+    if(ratio === 0) return "#ffffff";
+    if(ratio <= 0.33) return getComputedStyle(document.documentElement).getPropertyValue("--c1").trim();
+    if(ratio <= 0.66) return getComputedStyle(document.documentElement).getPropertyValue("--c2").trim();
+    return getComputedStyle(document.documentElement).getPropertyValue("--c3").trim();
+  }
+
+  function barColourFor(ratio){
+    if(ratio === 0) return getComputedStyle(document.documentElement).getPropertyValue("--bar0").trim();
+    if(ratio <= 0.33) return getComputedStyle(document.documentElement).getPropertyValue("--bar1").trim();
+    if(ratio <= 0.66) return getComputedStyle(document.documentElement).getPropertyValue("--bar2").trim();
+    return getComputedStyle(document.documentElement).getPropertyValue("--bar3").trim();
+  }
+
+  function prettyDate(d){
+    const wd = WEEKDAYS_MON[(d.getDay() + 6) % 7];
+    const fullMonth = MONTHS_LONG[d.getMonth()];
+    return `${wd}, ${fullMonth} ${d.getDate()}, ${d.getFullYear()}`;
+  }
+
+function calculateStreak(){
+  let longest = 0;
+  let run = 0;
+
+  const keys = Object.keys(dayData).sort();
+
+  for(const key of keys){
+    const ratio = completionRatioFor(key);
+    if(ratio === 1){
+      run++;
+      if(run > longest) longest = run;
+    } else {
+      run = 0;
+    }
+  }
+
+  let current = 0;
+  const d = new Date();
+  d.setHours(0,0,0,0);
+
+  while(true){
+    const key = toKey(d);
+    const ratio = completionRatioFor(key);
+    if(ratio === 1){
+      current++;
+      d.setDate(d.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+
+  return { current, longest };
+}
+
+function renderStreak(){
+  const streak = calculateStreak();
+  const el = document.getElementById("streakInfo");
+  el.textContent = `Current Streak: ${streak.current} days | Longest Streak: ${streak.longest} days`;
+}
+
+
+
+
+
+  const daysGridEl = document.getElementById("daysGrid");
+  const tasksAreaEl = document.getElementById("tasksArea");
+  const dateLineEl = document.getElementById("dateLine");
+  const monthLabelEl = document.getElementById("monthLabel");
+  const prevBtn = document.getElementById("prevBtn");
+  const nextBtn = document.getElementById("nextBtn");
+  const weekdayRowEl = document.getElementById("weekdayRow");
+  const taskEditorEl = document.getElementById("taskEditor");
+  const newTaskInputEl = document.getElementById("newTaskInput");
+  const addTaskBtn = document.getElementById("addTaskBtn");
+
+  weekdayRowEl.innerHTML = "";
+  for(const wd of WEEKDAYS_MON){
+    const div = document.createElement("div");
+    div.className = "weekday";
+    div.textContent = wd;
+    weekdayRowEl.appendChild(div);
+  }
+
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  let viewYear = today.getFullYear();
+  let viewMonth = today.getMonth();
+
+  let selectedDate = new Date(today);
+  let selectedKey = toKey(selectedDate);
+
+  ensureDay(selectedKey);
+
+  function setMonthLabel(){
+    monthLabelEl.textContent = `${MONTHS_LONG[viewMonth]} ${viewYear}`;
+  }
+
+  function buildMonthCells(year, monthIndex){
+    const first = new Date(year, monthIndex, 1);
+    const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+    const jsDay = first.getDay();
+    const mondayIndex = (jsDay + 6) % 7;
+
+    const cells = [];
+    for(let i=0; i<mondayIndex; i++){
+      cells.push(null);
+    }
+    for(let day=1; day<=daysInMonth; day++){
+      cells.push(new Date(year, monthIndex, day));
+    }
+    return cells;
+  }
+
+  function renderDays(){
+    daysGridEl.innerHTML = "";
+    setMonthLabel();
+
+    const cells = buildMonthCells(viewYear, viewMonth);
+
+    for(const d of cells){
+      if(d === null){
+        const blank = document.createElement("div");
+        blank.className = "blank";
+        daysGridEl.appendChild(blank);
+        continue;
+      }
+
+      const key = toKey(d);
+      ensureDay(key);
+
+      const ratio = completionRatioFor(key);
+
+      const card = document.createElement("div");
+      card.className = "dayCard";
+      card.style.background = colourFor(ratio);
+
+      if(key === selectedKey){
+        card.classList.add("selected");
+      }
+
+      const top = document.createElement("div");
+      top.className = "dayTop";
+      top.textContent = WEEKDAYS_MON[(d.getDay()+6)%7];
+
+
+      const mid = document.createElement("div");
+      mid.className = "dayNum";
+      mid.textContent = d.getDate();
+
+      const bottom = document.createElement("div");
+      bottom.className = "dayMonth";
+      bottom.textContent = MONTHS_SHORT[d.getMonth()];
+
+      const track = document.createElement("div");
+      track.className = "progressTrack";
+
+      const fill = document.createElement("div");
+      fill.className = "progressFill";
+      fill.style.width = Math.round(ratio * 100) + "%";
+      fill.style.background = barColourFor(ratio);
+
+      track.appendChild(fill);
+
+      card.appendChild(top);
+      card.appendChild(mid);
+      card.appendChild(bottom);
+      card.appendChild(track);
+
+      card.addEventListener("click", () => {
+        selectedDate = new Date(d);
+        selectedKey = toKey(selectedDate);
+        ensureDay(selectedKey);
+        renderDays();
+        renderTasksForSelected();
+        renderStreak();
+
+      });
+
+      daysGridEl.appendChild(card);
+    }
+  }
+
+  function renderTasksForSelected(){
+    dateLineEl.textContent = prettyDate(selectedDate);
+    ensureDay(selectedKey);
+
+    tasksAreaEl.innerHTML = "";
+
+    if(tasks.length === 0){
+      const div = document.createElement("div");
+      div.className = "hint";
+      div.textContent = "No tasks yet. Add one below.";
+      tasksAreaEl.appendChild(div);
+      return;
+    }
+
+    for(const t of tasks){
+      const row = document.createElement("div");
+      row.className = "taskRow";
+
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.checked = dayData[selectedKey][t.id] === true;
+
+      const label = document.createElement("label");
+      label.textContent = t.name;
+
+      cb.addEventListener("change", () => {
+        dayData[selectedKey][t.id] = cb.checked;
+        saveJSON("dayData", dayData);
+        renderDays();
+        renderStreak();
+      });
+
+      row.appendChild(cb);
+      row.appendChild(label);
+      tasksAreaEl.appendChild(row);
+    }
+  }
+
+  function renderTaskEditor(){
+    taskEditorEl.innerHTML = "";
+
+    for(const t of tasks){
+      const row = document.createElement("div");
+      row.className = "editRow";
+
+      const input = document.createElement("input");
+      input.className = "textInput";
+      input.type = "text";
+      input.value = t.name;
+
+      const del = document.createElement("button");
+      del.className = "btn danger";
+      del.type = "button";
+      del.textContent = "Delete";
+
+      input.addEventListener("input", () => {
+        t.name = input.value;
+        saveJSON("tasks", tasks);
+        renderTasksForSelected();
+      });
+
+      del.addEventListener("click", () => {
+        const id = t.id;
+        tasks = tasks.filter(x => x.id !== id);
+        saveJSON("tasks", tasks);
+
+        for(const k in dayData){
+          if(dayData[k] && typeof dayData[k] === "object"){
+            delete dayData[k][id];
+          }
+        }
+        saveJSON("dayData", dayData);
+
+        renderTaskEditor();
+        renderTasksForSelected();
+        renderDays();
+        renderStreak();
+
+      });
+
+      row.appendChild(input);
+      row.appendChild(del);
+      taskEditorEl.appendChild(row);
+    }
+  }
+
+  const darkToggle = document.getElementById("darkToggle");
+
+    function setDarkMode(enabled){
+  if(enabled){
+    document.documentElement.classList.add("dark");
+    localStorage.setItem("darkMode", "true");
+  } else {
+    document.documentElement.classList.remove("dark");
+    localStorage.setItem("darkMode", "false");
+  }
+}
+
+darkToggle.addEventListener("click", () => {
+  const isDark = document.documentElement.classList.contains("dark");
+  setDarkMode(!isDark);
+});
+
+if(localStorage.getItem("darkMode") === "true"){
+  setDarkMode(true);
+}
+
+
+  addTaskBtn.addEventListener("click", () => {
+    const name = newTaskInputEl.value.trim();
+    if(name.length === 0) return;
+
+    tasks.push({ id: makeId(), name });
+    saveJSON("tasks", tasks);
+
+    newTaskInputEl.value = "";
+
+    renderTaskEditor();
+    renderTasksForSelected();
+    renderDays();
+    renderStreak();
+
+  });
+
+  newTaskInputEl.addEventListener("keydown", (e) => {
+    if(e.key === "Enter"){
+      addTaskBtn.click();
+    }
+  });
+
+  prevBtn.addEventListener("click", () => {
+    viewMonth -= 1;
+    if(viewMonth < 0){
+      viewMonth = 11;
+      viewYear -= 1;
+    }
+    renderDays();
+  });
+
+  nextBtn.addEventListener("click", () => {
+    viewMonth += 1;
+    if(viewMonth > 11){
+      viewMonth = 0;
+      viewYear += 1;
+    }
+    renderDays();
+  });
+
+  renderTaskEditor();
+  renderDays();
+  renderTasksForSelected();
+  renderStreak();
+
+</script>
+</body>
+</html>
