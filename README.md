@@ -1,6 +1,8 @@
 # Habit Tracker Calendar App
 
-A browser-based habit tracking web application that allows users to complete daily tasks and visually track consistency over time.
+A browser-based habit tracking web application that I made for myself because I couldn't find something similar that I liked. 
+
+Allows you to complete daily tasks and visually track consistency over time.
 
 The calendar displays daily progress using colour intensity and a progress bar, encouraging habit streak building.
 
@@ -40,8 +42,6 @@ The application visually represents daily completion levels using colour progres
 - HTML5
 - CSS3 (Custom Properties / Variables)
 - Vanilla JavaScript
-- DOM Manipulation
-- localStorage API
 
 ---
 
